@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JOY · Reports</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#18181b; --muted:#71717a; --line:#e4e4e7; --bg:#fafaf9; --card:#ffffff; --accent:#44403c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Inter', system-ui, -apple-system, sans-serif;
+    background:var(--bg); color:var(--ink);
+  }
+  #shell-header{
+    background:#ffffff; border-bottom:1px solid var(--line);
+    padding:0 20px; position:sticky; top:0; z-index:40;
+  }
+  #shell-header-inner{
+    max-width:1160px; margin:0 auto; display:flex; align-items:center;
+    gap:28px; height:60px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; color:var(--ink);}
+  .brand-mark{
+    width:26px; height:26px; border-radius:7px; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; letter-spacing:.02em;
+  }
+  #tabs{display:flex; gap:4px; margin-left:auto;}
+  #tabs button{
+    border:0; background:transparent; padding:9px 16px; font-size:13.5px; font-weight:500;
+    color:var(--muted); cursor:pointer; border-radius:8px; font-family:inherit;
+    transition:background .15s, color .15s;
+  }
+  #tabs button:hover{background:#f4f4f5; color:var(--ink);}
+  #tabs button.active{background:var(--ink); color:#fff;}
+  .view{display:none;}
+  .view.active{display:block;}
+  #boot-msg{
+    max-width:1160px; margin:60px auto; padding:0 20px; color:var(--muted); font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<div id="shell-header">
+  <div id="shell-header-inner">
+    <div class="brand"><span class="brand-mark">JY</span>JOY · Reports</div>
+    <div id="tabs">
+      <button id="tab-anmeldung" class="active">Anmeldeverhalten</button>
+      <button id="tab-feedback">Feedback</button>
+    </div>
+  </div>
+</div>
+
+<div id="boot-msg">Lädt …</div>
+
+<div id="view-anmeldung" class="view active"><div id="root-dashboard"></div></div>
+<div id="view-feedback" class="view"><div id="root-berichte"></div></div>
+
+<!-- React -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<!-- Recharts (UMD) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-scale/4.0.2/d3-scale.min.js" crossorigin></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+<!-- PapaParse -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin></script>
+<!-- Babel standalone (in-browser JSX transform) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.25.6/babel.min.js" crossorigin></script>
+
+<script type="text/babel" data-presets="react" src="./dashboard.js"></script>
+<script type="text/babel" data-presets="react" src="./berichte.js"></script>
+
+<script type="text/babel" data-presets="react">
+  const tabAnmeldung = document.getElementById("tab-anmeldung");
+  const tabFeedback = document.getElementById("tab-feedback");
+  const viewAnmeldung = document.getElementById("view-anmeldung");
+  const viewFeedback = document.getElementById("view-feedback");
+  const bootMsg = document.getElementById("boot-msg");
+
+  let dashMounted = false, berichteMounted = false;
+
+  function mountDashboard(){
+    if(dashMounted) return;
+    dashMounted = true;
+    const root = ReactDOM.createRoot(document.getElementById("root-dashboard"));
+    root.render(React.createElement(window.JOYDashboard));
+  }
+  function mountBerichte(){
+    if(berichteMounted) return;
+    berichteMounted = true;
+    const root = ReactDOM.createRoot(document.getElementById("root-berichte"));
+    root.render(React.createElement(window.BerichteApp));
+  }
+
+  function showTab(name){
+    const isAnmeldung = name === "anmeldung";
+    tabAnmeldung.classList.toggle("active", isAnmeldung);
+    tabFeedback.classList.toggle("active", !isAnmeldung);
+    viewAnmeldung.classList.toggle("active", isAnmeldung);
+    viewFeedback.classList.toggle("active", !isAnmeldung);
+    try{
+      if(isAnmeldung) mountDashboard(); else mountBerichte();
+    }catch(err){
+      bootMsg.style.display = "block";
+      bootMsg.textContent = "Fehler beim Laden (" + name + "): " + err.message;
+      console.error(err);
+    }
+  }
+  tabAnmeldung.addEventListener("click", () => showTab("anmeldung"));
+  tabFeedback.addEventListener("click", () => showTab("feedback"));
+
+  window.addEventListener("load", () => {
+    try{
+      mountDashboard();
+      bootMsg.style.display = "none";
+    }catch(err){
+      bootMsg.textContent = "Fehler beim Laden: " + err.message;
+      console.error(err);
+    }
+  });
+</script>
+
+</body>
+</html>

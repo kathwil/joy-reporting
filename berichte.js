@@ -1,5 +1,5 @@
 (function(){
-const { useState, useMemo, useEffect, useRef } = React;
+const { useState, useMemo } = React;
 const { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ReferenceLine } = Recharts;
 
 /* ============================================================
@@ -24,10 +24,6 @@ const KEYMAP = [
   ["Haltung zu Bildung und Beruf","bildung"],["Rolle spielt Religion","religion"],
   ["verbringst du am liebsten","freizeit"],["erwartest du persönlich am meisten","kirche"],
 ];
-function shortKey(col){ for(const [frag,k] of KEYMAP){ if(col.includes(frag)) return k; } return null; }
-function mapRows(rows){
-  return rows.map(r=>{ const o={}; for(const col in r){ const k=shortKey(col); if(k) o[k]=(r[col]||"").trim(); } return o; });
-}
 
 /* ---- seed editions (event date is the identity; Durchführungs-Nr. chronologisch) ---- */
 const SEED = [
@@ -60,9 +56,9 @@ const INSP_LBL = {5:"sehr inspirierend",4:"inspirierend",3:"neutral",2:"eher nic
 /* "Wie erfahren" — acht Kategorien für ein lesbares Kreisdiagramm */
 const ERF_BUCKETS = ["Freunde / Familie","E-Mail-Einladung","Soziale Medien","Flyer","Plakate","Pfarrblatt / Zeitung","Postkarte","Sonstiges"];
 const ERFCOL = {
-  "Freunde / Familie":"#44403c", "E-Mail-Einladung":"#6b6560", "Soziale Medien":"#8a8580",
-  "Flyer":"#bcb8b3", "Plakate":"#c4c0ba", "Pfarrblatt / Zeitung":"#1c1917",
-  "Postkarte":"#78716c", "Sonstiges":"#e7e5e4",
+  "Freunde / Familie":"#152a40", "E-Mail-Einladung":"#384b5d", "Soziale Medien":"#5b6a79",
+  "Flyer":"#7e8996", "Plakate":"#a1aab3", "Pfarrblatt / Zeitung":"#233f60",
+  "Postkarte":"#c5cacf", "Sonstiges":"#e5a400",
 };
 function bucketErfahren(v){
   if(v==="Freunde / Familie") return "Freunde / Familie";
@@ -215,9 +211,9 @@ function Section({n, title, children, sub}) {
 /* ============================================================
    Single-edition report (PDF-structured)
    ============================================================ */
-const STCOL = {Erde:"#bcb8b3", Wasser:"#6b6560", Luft:"#8a8580", Feuer:"#c4c0ba"};
-const RATECOL = {"gefiel mir super":"#1c1917","gefiel mir gut":"#57534e","gefiel mir weniger":"#a8a29e","gefiel mir gar nicht":"#d6d3d1"};
-const ATMOCOL = {"sehr ansprechend":"#1c1917","ansprechend":"#57534e","weniger ansprechend":"#a8a29e","nicht ansprechend":"#d6d3d1"};
+const STCOL = {Erde:"#5b6a79", Wasser:"#152a40", Luft:"#a1aab3", Feuer:"#233f60"};
+const RATECOL = {"gefiel mir super":"#152a40","gefiel mir gut":"#506071","gefiel mir weniger":"#778491","gefiel mir gar nicht":"#9ea7b1"};
+const ATMOCOL = {"sehr ansprechend":"#152a40","ansprechend":"#506071","weniger ansprechend":"#778491","nicht ansprechend":"#9ea7b1"};
 function stationScore(st){ const besuche=st.besuche||1;
   const pos = (st.ratings.find(r=>r.label==="gefiel mir super")?.value||0) + (st.ratings.find(r=>r.label==="gefiel mir gut")?.value||0);
   return pct(pos,besuche); }
@@ -227,15 +223,15 @@ function EditionReport({ed}){
   const t = a.erw.total||1;
   const erfData = Object.entries(a.erf).filter(([k,v])=>v>0).map(([k,v])=>({label:k,value:v,pct:pct(v,a.n)})).sort((x,y)=>y.value-x.value);
   const erwCats = [
-    {label:"Besser als erwartet (5)", value:a.erw.besser, pct:pct(a.erw.besser,t), color:"#1c1917"},
+    {label:"Besser als erwartet (5)", value:a.erw.besser, pct:pct(a.erw.besser,t), color:"#152a40"},
     {label:"Erwartungen erfüllt (4)", value:a.erw.erfuellt, pct:pct(a.erw.erfuellt,t), color:"var(--gold)"},
-    {label:"Neutral (3)", value:a.erw.neutral, pct:pct(a.erw.neutral,t), color:"#78716c"},
-    {label:"Darunter (1–2)", value:a.erw.negativ, pct:pct(a.erw.negativ,t), color:"#292524"},
+    {label:"Neutral (3)", value:a.erw.neutral, pct:pct(a.erw.neutral,t), color:"#7e8996"},
+    {label:"Darunter (1–2)", value:a.erw.negativ, pct:pct(a.erw.negativ,t), color:"#c5cacf"},
   ];
   const progRanked = Object.entries(a.progC).sort((x,y)=>y[1]-x[1]);
   const progData = progRanked.map(([k,v],i)=>({label:`${i+1}. ${k}`,value:pct(v,a.n),pct:null}));
   const inspData = [5,4,3,2,1].map(k=>({label:`${INSP_LBL[k]} (${k})`, value:a.inspD[k], pct:pct(a.inspD[k],a.inspAns||1),
-    color:{5:"#1c1917",4:"#57534e",3:"#78716c",2:"#a8a29e",1:"#d6d3d1"}[k]}));
+    color:{5:"#152a40",4:"#384b5d",3:"#5b6a79",2:"#a1aab3",1:"#c5cacf"}[k]}));
   const stationsRanked = [...a.stations].sort((x,y)=>stationScore(y)-stationScore(x));
 
   return (
@@ -310,9 +306,9 @@ function EditionReport({ed}){
       <Section n="08" title="Teilnahme in Zukunft?">
         <Donut center={{num:`${pct(a.zukunft.ja,a.zukunft.total||1)}%`, lbl:"ja"}}
           segments={[
-            {label:"ja", value:a.zukunft.ja, color:"#1c1917"},
+            {label:"ja", value:a.zukunft.ja, color:"#152a40"},
             {label:"vielleicht", value:a.zukunft.vielleicht, color:"var(--gold)"},
-            {label:"nein", value:a.zukunft.nein, color:"#292524"},
+            {label:"nein", value:a.zukunft.nein, color:"#c5cacf"},
           ].filter(s=>s.value>0)} />
       </Section>
 
@@ -385,7 +381,7 @@ function ErfahrenTrend({csvEds}){
       : ` Bei der ${ORD[firstEd.nr]}. Durchführung führte «${fTop.label}» (${fPct} %), bei der ${ORD[lastEd.nr]}. «${lTop.label}» (${lPct} %).`;
   }
   return (
-    <Section n="01" title="Wie hast du von JOY erfahren?" sub="Gepoolt über die ausgewählten Durchführungen.">
+    <Section n="02" title="Wie hast du von JOY erfahren?" sub="Zusammengefasst über die ausgewählten Durchführungen.">
       <Donut center={{num:`${pct(top.value,pooled.n)}%`, lbl:top.label}}
         segments={pooledData.map(d=>({...d, color:ERFCOL[d.label]}))}/>
       <p className="narrative">{narrative}</p>
@@ -399,7 +395,7 @@ function ProgrammTrend({csvEds}){
   const pooled = useMemo(()=>analyze(csvEds.flatMap(e=>e.raw)),[csvEds]);
   const ranked = Object.entries(pooled.progC).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k,value:v,pct:pct(v,pooled.n)}));
   const top = ranked[0];
-  let narrative = `«${top.label}» ist gepoolt über die Auswahl der meistgenannte Programmpunkt (${top.pct} % der Antworten, Mehrfachnennungen möglich).`;
+  let narrative = `«${top.label}» ist über die ausgewählten Durchführungen der meistgenannte Programmpunkt (${top.pct} % der Antworten, Mehrfachnennungen möglich).`;
   if(multi){
     const fa=analyze(firstEd.raw), la=analyze(lastEd.raw);
     const fTop = Object.entries(fa.progC).sort((a,b)=>b[1]-a[1])[0];
@@ -409,7 +405,7 @@ function ProgrammTrend({csvEds}){
       : ` Bei der ${ORD[firstEd.nr]}. Durchführung führte «${fTop[0]}» (${pct(fTop[1],fa.n)} %), bei der ${ORD[lastEd.nr]}. «${lTop[0]}» (${pct(lTop[1],la.n)} %).`;
   }
   return (
-    <Section n="03" title="Beliebtester Programmpunkt" sub="Rangliste nach Anteil der Nennungen, gepoolt über die Auswahl. Mehrfachnennungen möglich.">
+    <Section n="04" title="Beliebtester Programmpunkt" sub="Rangliste nach Anteil der Nennungen über die ausgewählten Durchführungen. Mehrfachnennungen möglich.">
       <Bars data={ranked.map((d,i)=>({label:`${i+1}. ${d.label}`, value:d.pct, suffix:"%"}))} suffix="%"/>
       <p className="narrative">{narrative}</p>
     </Section>
@@ -420,9 +416,12 @@ function ProgrammTrend({csvEds}){
 function StationenTrend({csvEds}){
   const {firstEd,lastEd,multi} = trendEdges(csvEds);
   const pooled = useMemo(()=>analyze(csvEds.flatMap(e=>e.raw)),[csvEds]);
-  const ranked = [...pooled.stations].sort((a,b)=>stationScore(b)-stationScore(a));
+  const ranked = [...pooled.stations].sort((a,b)=>stationScore(b)-stationScore(a) || b.besuche-a.besuche);
   const top = ranked[0], bottom = ranked[ranked.length-1];
-  let narrative = `Station ${top.name} schneidet mit einer Zustimmung von ${stationScore(top)} % (${top.besuche} Besuche gepoolt) am besten ab, Station ${bottom.name} mit ${stationScore(bottom)} % am schwächsten.`;
+  const topScore = stationScore(top), bottomScore = stationScore(bottom);
+  let narrative = topScore===bottomScore
+    ? `Alle vier Stationen liegen mit einer Zustimmung von ${topScore} % gleichauf.`
+    : `Station ${top.name} schneidet mit einer Zustimmung von ${topScore} % (${top.besuche} Besuche) am besten ab, Station ${bottom.name} mit ${bottomScore} % am schwächsten.`;
   if(multi){
     const fa = analyze(firstEd.raw), la = analyze(lastEd.raw);
     const fTop = [...fa.stations].sort((a,b)=>stationScore(b)-stationScore(a))[0];
@@ -432,7 +431,7 @@ function StationenTrend({csvEds}){
       : ` Bei der ${ORD[firstEd.nr]}. Durchführung führte Station ${fTop.name} (${stationScore(fTop)} %), bei der ${ORD[lastEd.nr]}. Station ${lTop.name} (${stationScore(lTop)} %).`;
   }
   return (
-    <Section n="04" title="Beliebtheit der Stationen" sub="Rangliste nach Zustimmung («gefiel mir super» + «gefiel mir gut»), gepoolt über die Auswahl.">
+    <Section n="05" title="Beliebtheit der Stationen" sub="Zustimmung = Anteil der Stationsbesuche mit «gefiel mir super» oder «gefiel mir gut», über die ausgewählten Durchführungen zusammengezählt.">
       <div className="station-grid">
         {ranked.map((st,i)=>(
           <div className="station-card" key={st.name}>
@@ -454,7 +453,7 @@ function AtmosphaereTrend({csvEds}){
   const pooled = useMemo(()=>analyze(csvEds.flatMap(e=>e.raw)),[csvEds]);
   const shareSehr = at => pct(at.vals.find(v=>v.label==="sehr ansprechend")?.value||0, at.total||1);
   const musik = pooled.atmo.find(a=>a.name==="Musik"), licht = pooled.atmo.find(a=>a.name==="Licht");
-  let narrative = `Musik erreicht gepoolt einen Anteil von ${shareSehr(musik)} % «sehr ansprechend», Licht ${shareSehr(licht)} %.`;
+  let narrative = `Musik erreicht über die ausgewählten Durchführungen einen Anteil von ${shareSehr(musik)} % «sehr ansprechend», Licht ${shareSehr(licht)} %.`;
   if(multi){
     const fa=analyze(firstEd.raw), la=analyze(lastEd.raw);
     const fM=fa.atmo.find(a=>a.name==="Musik"), lM=la.atmo.find(a=>a.name==="Musik");
@@ -462,7 +461,7 @@ function AtmosphaereTrend({csvEds}){
     narrative += ` Bei Musik ${fmtPctDelta(shareSehr(fM),shareSehr(lM))} (${ORD[firstEd.nr]}. → ${ORD[lastEd.nr]}. Durchführung), bei Licht ${fmtPctDelta(shareSehr(fL),shareSehr(lL))}.`;
   }
   return (
-    <Section n="05" title="Atmosphäre – Musik & Licht" sub="Anteil «sehr ansprechend» / «ansprechend» / «weniger» / «nicht ansprechend», gepoolt über die Auswahl.">
+    <Section n="06" title="Atmosphäre – Musik & Licht" sub="Anteil «sehr ansprechend» / «ansprechend» / «weniger» / «nicht ansprechend» über die ausgewählten Durchführungen.">
       <div className="atmo-grid">
         {pooled.atmo.map(at=>(
           <div className="atmo-card" key={at.name}>
@@ -477,14 +476,13 @@ function AtmosphaereTrend({csvEds}){
 }
 
 /* ---- 08 · Freitext-Rückmeldungen ---- */
-const HEDGE = /\b(aber|jedoch|leider|allerdings|könnte|sollte|fehlt|fehlte|weniger|schade|zu laut|zu viel|störte|schwierig)\b/i;
 function collectQuotes(csvEds){
   const verbesserung=[], sonstige=[], empf=[];
   [...csvEds].sort((a,b)=>b.date.localeCompare(a.date)).forEach(ed=>{
     const a = analyze(ed.raw);
     a.verbesserung.forEach(t=>verbesserung.push({t,ed}));
     a.sonstige.forEach(t=>sonstige.push({t,ed}));
-    a.empfTexts.filter(t=>HEDGE.test(t)).forEach(t=>empf.push({t,ed}));
+    a.empfTexts.forEach(t=>empf.push({t,ed}));
   });
   return {verbesserung, sonstige, empf};
 }
@@ -512,7 +510,7 @@ function FreitextTrend({csvEds}){
   const {verbesserung, sonstige, empf} = useMemo(()=>collectQuotes(csvEds),[csvEds]);
   const total = verbesserung.length+sonstige.length+empf.length;
   const perEd = csvEds.length? r1(total/csvEds.length) : 0;
-  let narrative = `Über die ${csvEds.length} ausgewählten Durchführungen wurden ${total} Freitext-Rückmeldungen erfasst (${verbesserung.length} zu Verbesserungspotenzial, ${sonstige.length} sonstige, ${empf.length} differenzierte Stimmen zur Weiterempfehlung) – im Schnitt ${perEd} pro Durchführung.`;
+  let narrative = `Über die ${csvEds.length} ausgewählten Durchführungen wurden ${total} Freitext-Rückmeldungen erfasst (${verbesserung.length} zu Verbesserungspotenzial, ${sonstige.length} sonstige, ${empf.length} Stimmen zur Weiterempfehlung) – im Schnitt ${perEd} pro Durchführung.`;
   if(multi){
     const f = collectQuotes([firstEd]), l = collectQuotes([lastEd]);
     const fT = f.verbesserung.length+f.sonstige.length+f.empf.length;
@@ -520,12 +518,12 @@ function FreitextTrend({csvEds}){
     narrative += ` Bei der ${ORD[firstEd.nr]}. Durchführung waren es ${fT}, bei der ${ORD[lastEd.nr]}. ${lT}.`;
   }
   return (
-    <Section n="08" title="Freitext-Rückmeldungen"
-      sub={`Aus «Verbesserungspotenzial», «Sonstige Rückmeldungen» und differenzierten Stimmen aus «Weiterempfehlung» – chronologisch, neueste zuerst.`}>
+    <Section n="01" title="Freitext-Rückmeldungen"
+      sub={`Aus «Verbesserungspotenzial», «Sonstige Rückmeldungen» und «Weiterempfehlung» – chronologisch, neueste zuerst.`}>
       <div className="quote-grid">
         <QuoteList items={verbesserung} label="Verbesserungspotenzial"/>
         <QuoteList items={sonstige} label="Sonstige Rückmeldungen"/>
-        <QuoteList items={empf} label="Differenzierte Stimmen zur Weiterempfehlung"/>
+        <QuoteList items={empf} label="Stimmen zur Weiterempfehlung"/>
       </div>
       <p className="narrative">{narrative}</p>
     </Section>
@@ -568,15 +566,6 @@ function TrendView({editions}){
       : `Der Überraschungseffekt bleibt hoch.`)
   ) : null;
 
-  const fmtCsvExport = ()=>{
-    const head = ["Nr","Datum","n","besser%","erfuellt%","neutral%","negativ%","Inspiration/5","Organisation/5","Dauer/5","Empfehlung%","Zukunft ja%"];
-    const lines = [head.join(";")];
-    withData.forEach(e=>{ const s=summary(e); lines.push([e.nr,e.date,s.n,s.besser,s.erfuellt,s.neutral,s.negativ,s.insp,s.org,s.dauer,s.empf??"",s.zukunft??""].join(";")); });
-    const blob = new Blob([lines.join("\n")],{type:"text/csv"});
-    const url = URL.createObjectURL(blob); const aE=document.createElement("a");
-    aE.href=url; aE.download="joy_kennzahlen_verlauf.csv"; aE.click(); URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="report">
       <header className="rep-hero">
@@ -586,12 +575,13 @@ function TrendView({editions}){
           {withData.length?`${fmtDate(withData[0].date)} – ${fmtDate(withData[withData.length-1].date)} · `:""}
           {withData.reduce((s,e)=>s+e.responses,0)} Antworten gesamt, ausschliesslich aus Rohdaten-CSV.
         </p>
-        <button className="btn-ghost" onClick={fmtCsvExport}>Kennzahlen als CSV</button>
       </header>
+
+      <FreitextTrend csvEds={withData}/>
 
       <ErfahrenTrend csvEds={withData}/>
 
-      <Section n="02" title="Haben sich die Erwartungen erfüllt? – Überraschungskurve"
+      <Section n="03" title="Haben sich die Erwartungen erfüllt? – Überraschungskurve"
         sub="Verteilung «besser als erwartet» / «erfüllt» / «neutral» / «darunter» je Durchführung.">
         <div className="chart">
           <ResponsiveContainer width="100%" height={300}>
@@ -601,10 +591,10 @@ function TrendView({editions}){
               <YAxis tick={{fontSize:11, fill:"var(--muted)"}} unit="%"/>
               <Tooltip contentStyle={ttStyle} formatter={(v)=>`${v}%`}/>
               <Legend wrapperStyle={{fontSize:12}}/>
-              <Bar dataKey="besser" stackId="a" name="besser als erwartet" fill="#1c1917"/>
-              <Bar dataKey="erfuellt" stackId="a" name="erfüllt" fill="#44403c"/>
-              <Bar dataKey="neutral" stackId="a" name="neutral" fill="#78716c"/>
-              <Bar dataKey="negativ" stackId="a" name="darunter" fill="#292524"/>
+              <Bar dataKey="besser" stackId="a" name="besser als erwartet" fill="#152a40"/>
+              <Bar dataKey="erfuellt" stackId="a" name="erfüllt" fill="#384b5d"/>
+              <Bar dataKey="neutral" stackId="a" name="neutral" fill="#7e8996"/>
+              <Bar dataKey="negativ" stackId="a" name="darunter" fill="#c5cacf"/>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -615,7 +605,7 @@ function TrendView({editions}){
       <StationenTrend csvEds={withData}/>
       <AtmosphaereTrend csvEds={withData}/>
 
-      <Section n="06" title="Organisation, Dauer & Inspiration"
+      <Section n="07" title="Organisation, Dauer & Inspiration"
         sub="Durchschnittswerte (Skala 1–5) im Verlauf.">
         <div className="chart">
           <ResponsiveContainer width="100%" height={280}>
@@ -625,16 +615,16 @@ function TrendView({editions}){
               <YAxis domain={[3,5]} tick={{fontSize:11, fill:"var(--muted)"}}/>
               <Tooltip contentStyle={ttStyle}/>
               <Legend wrapperStyle={{fontSize:12}}/>
-              <Line dataKey="org" name="Organisation" stroke="#6b6560" strokeWidth={2.5} dot={{r:3}}/>
-              <Line dataKey="dauer" name="Dauer" stroke="#44403c" strokeWidth={2.5} dot={{r:3}}/>
-              <Line dataKey="insp" name="Inspiration" stroke="#bcb8b3" strokeWidth={2.5} dot={{r:3}}/>
+              <Line dataKey="org" name="Organisation" stroke="#233f60" strokeWidth={2.5} dot={{r:3}}/>
+              <Line dataKey="dauer" name="Dauer" stroke="#152a40" strokeWidth={2.5} dot={{r:3}}/>
+              <Line dataKey="insp" name="Inspiration" stroke="#a1aab3" strokeWidth={2.5} dot={{r:3}}/>
             </LineChart>
           </ResponsiveContainer>
         </div>
         <p className="narrative">{kennzahlenNarrative()}</p>
       </Section>
 
-      <Section n="07" title="Wiederteilnahme & Weiterempfehlung"
+      <Section n="08" title="Wiederteilnahme & Weiterempfehlung"
         sub="Anteile je Durchführung, soweit erhoben.">
         <div className="chart">
           <ResponsiveContainer width="100%" height={260}>
@@ -644,15 +634,13 @@ function TrendView({editions}){
               <YAxis domain={[60,100]} tick={{fontSize:11, fill:"var(--muted)"}} unit="%"/>
               <Tooltip contentStyle={ttStyle} formatter={v=>v==null?"–":`${v}%`}/>
               <Legend wrapperStyle={{fontSize:12}}/>
-              <Line dataKey="empf" name="Weiterempfehlung" stroke="#1c1917" strokeWidth={2.5} dot={{r:3}} connectNulls/>
-              <Line dataKey="zukunft" name="Wiederteilnahme" stroke="#44403c" strokeWidth={2.5} dot={{r:3}} connectNulls/>
+              <Line dataKey="empf" name="Weiterempfehlung" stroke="#152a40" strokeWidth={2.5} dot={{r:3}} connectNulls/>
+              <Line dataKey="zukunft" name="Wiederteilnahme" stroke="#233f60" strokeWidth={2.5} dot={{r:3}} connectNulls/>
             </LineChart>
           </ResponsiveContainer>
         </div>
         <p className="narrative">{empfZukunftNarrative()}</p>
       </Section>
-
-      <FreitextTrend csvEds={withData}/>
     </div>
   );
 }
@@ -662,8 +650,7 @@ function TrendView({editions}){
    ============================================================ */
 function kindBadge(k){ return {csv:"CSV", none:"keine Daten"}[k] || k; }
 
-function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onUpload, onRemove, onlyData, setOnlyData}){
-  const fileRef = useRef();
+function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onlyData, setOnlyData}){
   const csvEds = editions.filter(e=>e.kind==="csv");
   const visible = editions.filter(e=> onlyData ? e.kind==="csv" : true);
   const allSel = visible.every(e=>sel.includes(e.id));
@@ -684,7 +671,7 @@ function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onUpl
         <div className="side-block">
           <div className="side-h">Durchführung wählen</div>
           <div className="ed-list">
-            {csvEds.map(e=>(
+            {[...csvEds].reverse().map(e=>(
               <button key={e.id} className={`ed-pick ${detail===e.id?"on":""}`} onClick={()=>setDetail(e.id)}>
                 <span className="ed-nr">{e.nr}</span>
                 <span className="ed-meta"><strong>{fmtDate(e.date)}</strong><span>{e.responses} Antworten · CSV{e.responses<10?" · geringe Stichprobe":""}</span></span>
@@ -700,7 +687,7 @@ function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onUpl
           </div>
           <label className="filter"><input type="checkbox" checked={onlyData} onChange={e=>setOnlyData(e.target.checked)}/> nur mit Datenlage</label>
           <div className="ed-list">
-            {visible.map(e=>{ const has=summary(e); const on=sel.includes(e.id);
+            {[...visible].reverse().map(e=>{ const has=summary(e); const on=sel.includes(e.id);
               return (
                 <label key={e.id} className={`ed-row ${!has?"dim":""} ${on?"on":""}`}>
                   <input type="checkbox" checked={on} disabled={!has}
@@ -709,47 +696,14 @@ function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onUpl
                   <span className="ed-meta"><strong>{fmtDate(e.date)}</strong>
                     <span>{e.responses>0?`${e.responses} Antworten`:"keine Antworten"} · <em>{kindBadge(e.kind)}</em>
                     {e.kind==="csv" && e.responses<10 && <span className="lown"> · geringe Stichprobe</span>}</span></span>
-                  {e.uploaded && <button className="x" title="Entfernen" onClick={ev=>{ev.preventDefault();onRemove(e.id);}}>×</button>}
                 </label>
               ); })}
           </div>
         </div>
       )}
 
-      <div className="side-block upload">
-        <div className="side-h">Neue Durchführung</div>
-        <input ref={fileRef} type="file" accept=".csv" hidden onChange={e=>{ const f=e.target.files[0]; if(f) onUpload(f); e.target.value=""; }}/>
-        <button className="btn-up" onClick={()=>fileRef.current.click()}>CSV hochladen</button>
-        <p className="hint">Google-Forms-Export der JOY-Umfrage. Spalten werden automatisch erkannt; Datum aus den Antworten übernommen.</p>
-      </div>
-
-      <button className="btn-print" onClick={()=>window.print()}>Bericht drucken / als PDF</button>
       <p className="foot">Quelle: Rohdaten-CSV aller Durchführungen 11.2024–06.2026 (ausser 02.05.25, keine Rückmeldungen).</p>
     </aside>
-  );
-}
-
-/* ============================================================
-   Upload dialog (confirm metadata)
-   ============================================================ */
-function UploadDialog({draft, onConfirm, onCancel}){
-  const [nr,setNr]=useState(draft.nr);
-  const [date,setDate]=useState(draft.date);
-  const [att,setAtt]=useState(draft.attendees||"");
-  return (
-    <div className="modal-bg" onClick={onCancel}>
-      <div className="modal" onClick={e=>e.stopPropagation()}>
-        <h3>Durchführung hinzufügen</h3>
-        <p className="note">{draft.responses} Antworten erkannt · {draft.detected} Spalten zugeordnet.</p>
-        <label>Durchführung Nr.<input type="number" value={nr} onChange={e=>setNr(e.target.value)}/></label>
-        <label>Datum<input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
-        <label>Teilnehmende (rund, optional)<input type="number" value={att} onChange={e=>setAtt(e.target.value)} placeholder="z. B. 130"/></label>
-        <div className="modal-actions">
-          <button className="btn-ghost" onClick={onCancel}>Abbrechen</button>
-          <button className="btn-up" onClick={()=>onConfirm({nr:parseInt(nr)||draft.nr, date, attendees:att?parseInt(att):null})}>Hinzufügen</button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -757,44 +711,11 @@ function UploadDialog({draft, onConfirm, onCancel}){
    Root
    ============================================================ */
 function BerichteApp(){
-  const [uploaded, setUploaded] = useState([]);
-  const editions = useMemo(()=>{
-    const merged = [...SEED, ...uploaded];
-    return merged.sort((a,b)=>a.date.localeCompare(b.date));
-  },[uploaded]);
-
+  const editions = SEED;
   const [view, setView] = useState("trend");
   const [onlyData, setOnlyData] = useState(true);
   const [sel, setSel] = useState(SEED.filter(e=>summary(e)).map(e=>e.id));
   const [detail, setDetail] = useState("e15");
-  const [draft, setDraft] = useState(null);
-
-  // persistence
-  useEffect(()=>{ (async()=>{ try{
-    const r = await window.storage.get("joy:editions");
-    if(r && r.value){ const list=JSON.parse(r.value);
-      setUploaded(list); setSel(s=>[...s, ...list.map(e=>e.id)]); }
-  }catch(e){} })(); },[]);
-  const persist = async(list)=>{ try{ await window.storage.set("joy:editions", JSON.stringify(list)); }catch(e){} };
-
-  const handleUpload = (file)=>{
-    Papa.parse(file,{header:true, skipEmptyLines:true, complete:(res)=>{
-      const raw = mapRows(res.data).filter(r=>Object.values(r).some(Boolean));
-      const detected = new Set(res.meta.fields.map(shortKey).filter(Boolean)).size;
-      const dates = raw.map(r=>r.ts).filter(Boolean).map(s=>s.split(" ")[0].replace(/\//g,"-"));
-      const date = dates.length? dates.sort()[0] : new Date().toISOString().slice(0,10);
-      const nextNr = Math.max(0,...editions.map(e=>e.nr||0))+1;
-      setDraft({raw, responses:raw.length, detected, date, nr:nextNr, attendees:null});
-    }});
-  };
-  const confirmUpload = (meta)=>{
-    const ed = {id:"u"+Date.now(), nr:meta.nr, date:meta.date, attendees:meta.attendees,
-      responses:draft.raw.length, kind:"csv", raw:draft.raw, uploaded:true, src:"Upload · CSV"};
-    const list=[...uploaded, ed]; setUploaded(list); persist(list);
-    setSel(s=>[...s, ed.id]); setDetail(ed.id); setDraft(null);
-  };
-  const removeEdition = (id)=>{ const list=uploaded.filter(e=>e.id!==id); setUploaded(list); persist(list);
-    setSel(s=>s.filter(x=>x!==id)); if(detail===id) setDetail("e15"); };
 
   const selectedEds = editions.filter(e=>sel.includes(e.id));
   const detailEd = editions.find(e=>e.id===detail) || editions.filter(e=>e.kind==="csv").slice(-1)[0];
@@ -803,7 +724,7 @@ function BerichteApp(){
     <div className="app">
       <style>{CSS}</style>
       <Sidebar editions={editions} sel={sel} setSel={setSel} view={view} setView={setView}
-        detail={detail} setDetail={setDetail} onUpload={handleUpload} onRemove={removeEdition}
+        detail={detail} setDetail={setDetail}
         onlyData={onlyData} setOnlyData={setOnlyData}/>
       <main className="main">
         {view==="single"
@@ -812,7 +733,6 @@ function BerichteApp(){
               ? <TrendView editions={selectedEds}/>
               : <Empty msg="Wähle links mindestens eine Durchführung mit Datenlage."/>)}
       </main>
-      {draft && <UploadDialog draft={draft} onConfirm={confirmUpload} onCancel={()=>setDraft(null)}/>}
     </div>
   );
 }
@@ -822,11 +742,11 @@ function Empty({msg}){ return <div className="empty"><div className="empty-mark"
    Styles
    ============================================================ */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 :root{
-  --navy:#18181b; --navy2:#27272a; --gold:#44403c; --gold-soft:#d6d3d1;
-  --parch:#f4f4f5; --paper:#fafafa; --ink:#18181b; --muted:#71717a; --line:#e4e4e7;
-  --serif:'Inter',system-ui,sans-serif; --sans:'Inter',system-ui,sans-serif;
+  --navy:#152a40; --navy2:#233f60; --gold:#233f60; --accent:#f0d57b; --gold-soft:rgba(240,213,123,.6);
+  --parch:#e8eaec; --paper:#ffffff; --ink:#152a40; --muted:#5b6b7d; --line:#dde3e8;
+  --serif:'Montserrat',system-ui,sans-serif; --sans:'Montserrat',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 .app{display:flex; min-height:100vh; font-family:var(--sans); color:var(--ink); background:var(--parch);}
@@ -835,26 +755,27 @@ const CSS = `
   display:flex; flex-direction:column; gap:18px; position:sticky; top:0; height:100vh; overflow-y:auto;}
 .brand{display:flex; align-items:center; gap:12px;}
 .brand-mark{font-family:var(--serif); font-weight:600; font-size:26px; letter-spacing:1px; color:var(--navy);
-  background:var(--gold); width:46px; height:46px; display:flex; align-items:center; justify-content:center; border-radius:11px;}
+  background:var(--accent); width:46px; height:46px; display:flex; align-items:center; justify-content:center; border-radius:11px;}
 .brand-t{font-family:var(--serif); font-size:17px; color:#fff;}
 .brand-s{font-size:12px; color:var(--gold-soft); letter-spacing:.3px;}
 .view-toggle{display:flex; background:rgba(255,255,255,.07); border-radius:10px; padding:3px;}
 .view-toggle button{flex:1; padding:8px; border:0; background:transparent; color:#a1a1aa; font-size:13px;
   font-weight:500; border-radius:8px; cursor:pointer; font-family:var(--sans);}
-.view-toggle button.active{background:var(--gold); color:var(--navy);}
+.view-toggle button.active{background:var(--accent); color:var(--navy);}
 .side-block{display:flex; flex-direction:column; gap:9px;}
 .side-h{font-size:11px; text-transform:uppercase; letter-spacing:1.4px; color:var(--gold-soft);
   display:flex; justify-content:space-between; align-items:center;}
-.link{background:none; border:0; color:var(--gold); font-size:11px; cursor:pointer; text-decoration:underline; text-transform:none; letter-spacing:0;}
+.link{background:none; border:0; color:var(--accent); font-size:11px; cursor:pointer; text-decoration:underline; text-transform:none; letter-spacing:0;}
+.quote-col .link{color:var(--gold);}
 .filter{display:flex; align-items:center; gap:7px; font-size:12px; color:#a1a1aa; cursor:pointer;}
 .ed-list{display:flex; flex-direction:column; gap:5px; max-height:38vh; overflow-y:auto; padding-right:2px;}
 .ed-row,.ed-pick{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:9px;
   background:rgba(255,255,255,.04); cursor:pointer; border:1px solid transparent; text-align:left; width:100%;}
 .ed-pick{border:0; color:inherit; font-family:var(--sans);}
-.ed-row.on,.ed-pick.on{background:rgba(199,162,74,.15); border-color:rgba(199,162,74,.5);}
+.ed-row.on,.ed-pick.on{background:rgba(240,213,123,.16); border-color:rgba(240,213,123,.5);}
 .ed-row.dim{opacity:.45;}
-.ed-row input{accent-color:var(--gold); width:15px; height:15px; flex-shrink:0;}
-.ed-nr{font-family:var(--serif); font-size:15px; color:var(--gold); width:20px; flex-shrink:0; text-align:center;}
+.ed-row input{accent-color:var(--accent); width:15px; height:15px; flex-shrink:0;}
+.ed-nr{font-family:var(--serif); font-size:15px; color:var(--accent); width:20px; flex-shrink:0; text-align:center;}
 .ed-meta{display:flex; flex-direction:column; line-height:1.3; flex:1; min-width:0;}
 .ed-meta strong{font-size:13px; color:#f4f4f5; font-weight:500;}
 .ed-meta span{font-size:11px; color:#a1a1aa;}
@@ -864,16 +785,11 @@ const CSS = `
   padding:9px 13px; margin-top:12px; max-width:62ch; line-height:1.5;}
 .x{margin-left:auto; background:none; border:0; color:#a1a1aa; font-size:16px; cursor:pointer;}
 .hint{font-size:11px; color:#a1a1aa; line-height:1.5;}
-.btn-up{background:var(--gold); color:var(--navy); border:0; padding:10px; border-radius:9px;
-  font-weight:600; cursor:pointer; font-family:var(--sans); font-size:13px;}
-.btn-print{margin-top:auto; background:transparent; color:#e4e4e7; border:1px solid rgba(255,255,255,.25);
-  padding:11px; border-radius:9px; cursor:pointer; font-size:13px; font-weight:500; font-family:var(--sans);}
-.btn-print:hover{border-color:var(--gold); color:var(--gold);}
 .foot{font-size:10px; color:#71717a; line-height:1.5;}
 /* ---- main ---- */
 .main{flex:1; padding:40px 48px; max-width:960px;}
 .report{display:flex; flex-direction:column; gap:30px;}
-.rep-hero{border-bottom:2px solid var(--gold); padding-bottom:22px;}
+.rep-hero{border-bottom:2px solid var(--accent); padding-bottom:22px;}
 .rep-kicker{font-size:11px; text-transform:uppercase; letter-spacing:2px; color:var(--gold); font-weight:600;}
 .rep-hero h2{font-family:var(--serif); font-size:32px; font-weight:500; margin:8px 0 0; color:var(--navy); line-height:1.15;}
 .rep-intro{font-size:14px; color:#3f3f46; line-height:1.65; margin:14px 0 0; max-width:62ch;}
@@ -888,7 +804,7 @@ const CSS = `
 .sec-sub{font-size:12.5px; color:var(--muted); margin:-8px 0 14px; line-height:1.5;}
 .note{font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; font-style:italic;}
 .narrative{font-size:13.5px; color:#3f3f46; line-height:1.7; margin-top:16px; padding:14px 16px;
-  background:var(--paper); border-left:3px solid var(--gold); border-radius:0 8px 8px 0;}
+  background:var(--paper); border-left:3px solid var(--accent); border-radius:0 8px 8px 0;}
 /* bars */
 .bars{display:flex; flex-direction:column; gap:8px;}
 .bar-row{display:grid; grid-template-columns:minmax(110px,38%) 1fr auto; align-items:center; gap:12px;}
@@ -910,7 +826,7 @@ const CSS = `
 .station-dot{width:11px; height:11px; border-radius:50%;}
 .station-count{margin-left:auto; font-size:11px; color:var(--muted); font-weight:400;}
 .rank-badge{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%;
-  background:var(--gold); color:var(--navy); font-family:var(--serif); font-size:11px; font-weight:600; flex-shrink:0;}
+  background:var(--accent); color:var(--navy); font-family:var(--serif); font-size:11px; font-weight:600; flex-shrink:0;}
 .atmo-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .atmo-head{font-size:14px; font-weight:600; color:var(--navy); margin-bottom:12px;}
 /* donut */
@@ -925,13 +841,13 @@ const CSS = `
 .milieu-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
 .milieu-h{font-size:13px; font-weight:600; color:var(--navy); margin-bottom:11px;}
 /* quotes (Freitext-Rückmeldungen, Verlauf) */
-.quote-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
-.quote-col{display:flex; flex-direction:column; gap:8px; min-width:0;}
+.quote-grid{display:grid; grid-template-columns:1fr; gap:22px;}
+.quote-col{display:flex; flex-direction:column; gap:9px; min-width:0; max-width:74ch;}
 .qcount{color:var(--muted); font-weight:400;}
 .q-date{display:inline-block; font-size:10.5px; color:var(--gold); font-weight:600; margin-right:6px; font-variant-numeric:tabular-nums;}
 /* lists */
 .quote-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:7px;}
-.quote-list li{font-size:13px; color:#3f3f46; line-height:1.5; padding:9px 13px; background:var(--paper);
+.quote-list li{font-size:13.5px; color:#3f3f46; line-height:1.55; padding:11px 15px; background:var(--paper);
   border:1px solid var(--line); border-radius:8px; border-left:3px solid var(--gold-soft);}
 .appendix{margin-top:6px; border:1px solid var(--line); border-radius:10px; background:var(--paper); padding:6px 14px;}
 .appendix summary{cursor:pointer; font-size:13px; font-weight:600; color:var(--navy); padding:8px 0;}

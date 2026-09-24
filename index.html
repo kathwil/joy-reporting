@@ -7,38 +7,39 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#18181b; --muted:#71717a; --line:#e4e4e7; --bg:#fafaf9; --card:#ffffff; --accent:#44403c;
+    --ink:#152a40; --muted:#5b6b7d; --line:#dde3e8; --bg:#e8eaec; --card:#ffffff;
+    --accent:#f0d57b; --accent-ink:#233f60;
   }
   *{box-sizing:border-box;}
   html,body{margin:0; padding:0;}
   body{
-    font-family:'Inter', system-ui, -apple-system, sans-serif;
+    font-family:'Montserrat', system-ui, -apple-system, sans-serif;
     background:var(--bg); color:var(--ink);
   }
   #shell-header{
-    background:#ffffff; border-bottom:1px solid var(--line);
+    background:var(--ink); border-bottom:1px solid var(--ink);
     padding:0 20px; position:sticky; top:0; z-index:40;
   }
   #shell-header-inner{
     max-width:1160px; margin:0 auto; display:flex; align-items:center;
     gap:28px; height:60px;
   }
-  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; color:var(--ink);}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; color:#fff;}
   .brand-mark{
-    width:26px; height:26px; border-radius:7px; background:var(--accent); color:#fff;
+    width:26px; height:26px; border-radius:7px; background:var(--accent); color:var(--ink);
     display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; letter-spacing:.02em;
   }
   #tabs{display:flex; gap:4px; margin-left:auto;}
   #tabs button{
     border:0; background:transparent; padding:9px 16px; font-size:13.5px; font-weight:500;
-    color:var(--muted); cursor:pointer; border-radius:8px; font-family:inherit;
+    color:rgba(255,255,255,.65); cursor:pointer; border-radius:8px; font-family:inherit;
     transition:background .15s, color .15s;
   }
-  #tabs button:hover{background:#f4f4f5; color:var(--ink);}
-  #tabs button.active{background:var(--ink); color:#fff;}
+  #tabs button:hover{background:rgba(255,255,255,.08); color:#fff;}
+  #tabs button.active{background:var(--accent); color:var(--ink);}
   .view{display:none;}
   .view.active{display:block;}
   #boot-msg{
@@ -69,8 +70,6 @@
 <!-- Recharts (UMD) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js" crossorigin></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
-<!-- PapaParse -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin></script>
 <!-- Babel standalone (in-browser JSX transform) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.25.6/babel.min.js" crossorigin></script>
 

@@ -60,9 +60,9 @@ const RET_TEILNAHMEN_TOTAL = 618;
 
 // ─── THEME (JOY-Brand: Navy / Gold, helles UI) ────────────────────────────────
 const C = {
-  green:"#1c1917", lightGreen:"#a8a29e", red:"#57534e", gray:"#8a8580", purple:"#44403c",
-  gold:"#292524", navy:"#18181b",
-  bg:"#fafaf9", card:"#FFFFFF", border:"#e4e4e7", text:"#18181b", muted:"#71717a", grid:"#f0f0ef"
+  green:"#152a40", lightGreen:"#637281", red:"#e5a400", gray:"#9ea7b1", purple:"#233f60",
+  gold:"#233f60", navy:"#152a40",
+  bg:"#e8eaec", card:"#FFFFFF", border:"#dde3e8", text:"#152a40", muted:"#5b6b7d", grid:"#eef1f3"
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ const MainTooltip = ({ active, payload, label }) => {
     <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.text, boxShadow:"0 4px 16px rgba(25,32,53,0.10)" }}>
       <div style={{ fontWeight: 600, marginBottom: 6 }}>{label}</div>
       <div style={{ color: C.green }}>Registriert &amp; erschienen: {d?.reg}</div>
-      {d?.walkin > 0 && <div style={{ color: "#1a8a64" }}>Walk-Ins: {d.walkin}</div>}
+      {d?.walkin > 0 && <div style={{ color: "#374f63" }}>Walk-Ins: {d.walkin}</div>}
       {d?.noshow > 0 && <div style={{ color: C.red }}>No-Shows: {d.noshow}</div>}
       <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 6, paddingTop: 6, fontWeight: 600 }}>Total: {d?.total}</div>
       {d?.survey && <div style={{ color: C.muted, marginTop:2 }}>Umfrageschätzung: ~{d.survey}</div>}
@@ -121,7 +121,7 @@ function JOYDashboard() {
   const tooltipStyle = { background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 12 };
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", padding: "24px 20px", fontFamily: "'Inter', system-ui, sans-serif", color: C.text, boxSizing: "border-box" }}>
+    <div style={{ background: C.bg, minHeight: "100vh", padding: "24px 20px", fontFamily: "'Montserrat', system-ui, sans-serif", color: C.text, boxSizing: "border-box" }}>
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
@@ -203,7 +203,7 @@ function JOYDashboard() {
                 <YAxis tick={{ fill: C.muted, fontSize: 11 }} domain={[0, 105]} tickFormatter={v => v + "%"} />
                 <Tooltip formatter={v => [`${v}%`, "Neue Personen"]} contentStyle={tooltipStyle} labelStyle={{ color: C.text }} itemStyle={{ color: C.green }} />
                 <Bar dataKey="newPct" radius={[3,3,0,0]} isAnimationActive={false}>
-                  {DATA.map((e, i) => <Cell key={i} fill={e.newPct >= 40 ? C.green : e.newPct >= 25 ? "#57534e" : "#a8a29e"} />)}
+                  {DATA.map((e, i) => <Cell key={i} fill={e.newPct >= 40 ? C.green : e.newPct >= 25 ? "#637281" : "#9ea7b1"} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

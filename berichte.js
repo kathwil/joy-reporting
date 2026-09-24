@@ -657,8 +657,7 @@ function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onlyD
   return (
     <aside className="side">
       <div className="brand">
-        <span className="brand-mark">JOY</span>
-        <div><div className="brand-t">Berichtsgenerator</div>
+        <div><div className="brand-t">Feedbacks</div>
           <div className="brand-s">Post-Event-Befragungen</div></div>
       </div>
 

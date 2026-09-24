@@ -68,7 +68,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <!-- Recharts (UMD) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js" crossorigin></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-scale/4.0.2/d3-scale.min.js" crossorigin></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
 <!-- PapaParse -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin></script>
@@ -78,55 +77,56 @@
 <script type="text/babel" data-presets="react" src="./dashboard.js"></script>
 <script type="text/babel" data-presets="react" src="./berichte.js"></script>
 
-<script type="text/babel" data-presets="react">
-  const tabAnmeldung = document.getElementById("tab-anmeldung");
-  const tabFeedback = document.getElementById("tab-feedback");
-  const viewAnmeldung = document.getElementById("view-anmeldung");
-  const viewFeedback = document.getElementById("view-feedback");
-  const bootMsg = document.getElementById("boot-msg");
+<script>
+  (function(){
+    var tabAnmeldung = document.getElementById("tab-anmeldung");
+    var tabFeedback  = document.getElementById("tab-feedback");
+    var viewAnmeldung = document.getElementById("view-anmeldung");
+    var viewFeedback  = document.getElementById("view-feedback");
+    var bootMsg = document.getElementById("boot-msg");
 
-  let dashMounted = false, berichteMounted = false;
+    var mounted = { anmeldung: false, feedback: false };
 
-  function mountDashboard(){
-    if(dashMounted) return;
-    dashMounted = true;
-    const root = ReactDOM.createRoot(document.getElementById("root-dashboard"));
-    root.render(React.createElement(window.JOYDashboard));
-  }
-  function mountBerichte(){
-    if(berichteMounted) return;
-    berichteMounted = true;
-    const root = ReactDOM.createRoot(document.getElementById("root-berichte"));
-    root.render(React.createElement(window.BerichteApp));
-  }
-
-  function showTab(name){
-    const isAnmeldung = name === "anmeldung";
-    tabAnmeldung.classList.toggle("active", isAnmeldung);
-    tabFeedback.classList.toggle("active", !isAnmeldung);
-    viewAnmeldung.classList.toggle("active", isAnmeldung);
-    viewFeedback.classList.toggle("active", !isAnmeldung);
-    try{
-      if(isAnmeldung) mountDashboard(); else mountBerichte();
-    }catch(err){
+    function fail(where, err){
       bootMsg.style.display = "block";
-      bootMsg.textContent = "Fehler beim Laden (" + name + "): " + err.message;
-      console.error(err);
+      bootMsg.textContent = "Fehler beim Laden (" + where + "): " + (err && err.message ? err.message : err);
+      if (window.console) console.error(err);
     }
-  }
-  tabAnmeldung.addEventListener("click", () => showTab("anmeldung"));
-  tabFeedback.addEventListener("click", () => showTab("feedback"));
 
-  window.addEventListener("load", () => {
-    try{
-      mountDashboard();
-      bootMsg.style.display = "none";
-    }catch(err){
-      bootMsg.textContent = "Fehler beim Laden: " + err.message;
-      console.error(err);
+    function mount(which){
+      if (mounted[which]) return true;
+      var Comp = which === "anmeldung" ? window.JOYDashboard : window.BerichteApp;
+      if (typeof Comp !== "function") return false;
+      try {
+        ReactDOM.createRoot(
+          document.getElementById(which === "anmeldung" ? "root-dashboard" : "root-berichte")
+        ).render(React.createElement(Comp));
+        mounted[which] = true;
+        return true;
+      } catch (err) { fail(which, err); return true; }
     }
-  });
+
+    function showTab(name){
+      var isAnmeldung = name === "anmeldung";
+      tabAnmeldung.classList.toggle("active", isAnmeldung);
+      tabFeedback.classList.toggle("active", !isAnmeldung);
+      viewAnmeldung.classList.toggle("active", isAnmeldung);
+      viewFeedback.classList.toggle("active", !isAnmeldung);
+      mount(name);
+    }
+    tabAnmeldung.addEventListener("click", function(){ showTab("anmeldung"); });
+    tabFeedback.addEventListener("click", function(){ showTab("feedback"); });
+
+    // Babel transpiles the external scripts asynchronously, so the components may
+    // appear well after window.load. Poll until the first one is ready.
+    var waited = 0;
+    (function waitForApp(){
+      if (mount("anmeldung")) { bootMsg.style.display = "none"; return; }
+      waited += 120;
+      if (waited > 30000) { fail("Start", new Error("Skripte konnten nicht geladen werden \u2013 bitte Seite neu laden.")); return; }
+      setTimeout(waitForApp, 120);
+    })();
+  })();
 </script>
-
 </body>
 </html>

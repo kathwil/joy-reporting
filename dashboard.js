@@ -1,3 +1,4 @@
+(function(){
 const { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell, BarChart, ReferenceLine } = Recharts;
 
 // ─── DATEN ────────────────────────────────────────────────────────────────────
@@ -18,21 +19,21 @@ const { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveCont
 //   survey   = im Post-Event-Bericht genannte Schätzung ("rund X Personen");
 //              Erhebungsmethode dort nicht dokumentiert → nur grober Referenzwert
 const DATA = [
-  { name:"Nov 2024", reg:96,  walkin:64, noshow:0,  total:160, guestPct:40, newPct:100, survey:160,  hasEC:false },
-  { name:"Jan 2025", reg:83,  walkin:0,  noshow:0,  total:83,  guestPct:31, newPct:47,  survey:110,  hasEC:false },
-  { name:"Feb 2025", reg:85,  walkin:0,  noshow:0,  total:85,  guestPct:37, newPct:50,  survey:null, hasEC:false },
-  { name:"Apr 2025", reg:62,  walkin:0,  noshow:0,  total:62,  guestPct:36, newPct:55,  survey:135,  hasEC:false },
-  { name:"Mai 2025", reg:73,  walkin:0,  noshow:0,  total:73,  guestPct:45, newPct:28,  survey:null, hasEC:false },
-  { name:"Jun 2025", reg:75,  walkin:0,  noshow:0,  total:75,  guestPct:53, newPct:26,  survey:110,  hasEC:false },
-  { name:"Sep 2025", reg:83,  walkin:19, noshow:16, total:102, guestPct:60, newPct:28,  survey:120,  hasEC:true  },
-  { name:"Nov 2025", reg:152, walkin:21, noshow:19, total:173, guestPct:59, newPct:44,  survey:160,  hasEC:true  },
-  { name:"Dez 2025", reg:73,  walkin:1,  noshow:7,  total:74,  guestPct:57, newPct:30,  survey:null, hasEC:true  },
-  { name:"Jan 2026", reg:97,  walkin:23, noshow:8,  total:120, guestPct:59, newPct:20,  survey:130,  hasEC:true  },
-  { name:"Feb 2026", reg:90,  walkin:19, noshow:7,  total:109, guestPct:53, newPct:21,  survey:null, hasEC:true  },
-  { name:"Mär 2026", reg:53,  walkin:8,  noshow:36, total:61,  guestPct:49, newPct:7,   survey:null, hasEC:true  },
-  { name:"Mai 2026", reg:71,  walkin:15, noshow:4,  total:86,  guestPct:59, newPct:0,   survey:null, hasEC:true  },
-  { name:"Jun 2026", reg:59,  walkin:7,  noshow:2,  total:66,  guestPct:55, newPct:20,  survey:null, hasEC:true  },
-  { name:"Sep 2026", reg:66,  walkin:12, noshow:7,  total:78,  guestPct:62, newPct:11,  survey:null, hasEC:true  },
+  { name:"Nov 2024", reg:96, walkin:64, noshow:0, total:160, guestPct:40, newPct:100, survey:160, hasEC:false },
+  { name:"Jan 2025", reg:83, walkin:0, noshow:0, total:83, guestPct:31, newPct:46, survey:110, hasEC:false },
+  { name:"Feb 2025", reg:85, walkin:0, noshow:0, total:85, guestPct:36, newPct:50, survey:null, hasEC:false },
+  { name:"Apr 2025", reg:62, walkin:0, noshow:0, total:62, guestPct:35, newPct:55, survey:135, hasEC:false },
+  { name:"Mai 2025", reg:73, walkin:0, noshow:0, total:73, guestPct:45, newPct:29, survey:null, hasEC:false },
+  { name:"Jun 2025", reg:75, walkin:0, noshow:0, total:75, guestPct:53, newPct:26, survey:110, hasEC:false },
+  { name:"Sep 2025", reg:83, walkin:19, noshow:16, total:102, guestPct:66, newPct:31, survey:120, hasEC:true },
+  { name:"Nov 2025", reg:152, walkin:21, noshow:16, total:173, guestPct:64, newPct:45, survey:160, hasEC:true },
+  { name:"Dez 2025", reg:73, walkin:1, noshow:3, total:74, guestPct:55, newPct:30, survey:null, hasEC:true },
+  { name:"Jan 2026", reg:97, walkin:23, noshow:8, total:120, guestPct:67, newPct:20, survey:130, hasEC:true },
+  { name:"Feb 2026", reg:91, walkin:19, noshow:6, total:110, guestPct:61, newPct:21, survey:null, hasEC:true },
+  { name:"Mär 2026", reg:55, walkin:8, noshow:34, total:63, guestPct:56, newPct:7, survey:null, hasEC:true },
+  { name:"Mai 2026", reg:71, walkin:15, noshow:4, total:86, guestPct:59, newPct:15, survey:null, hasEC:true },
+  { name:"Jun 2026", reg:59, walkin:7, noshow:2, total:66, guestPct:55, newPct:20, survey:null, hasEC:true },
+  { name:"Sep 2026", reg:66, walkin:12, noshow:7, total:78, guestPct:62, newPct:11, survey:null, hasEC:true },
 ];
 
 // Anmeldevorlauf über alle 15 Feiern kumuliert (Nov 2024 via eyeVIP-Anmeldedatum,
@@ -49,13 +50,13 @@ const LEAD_LABELS = ["T-0","T-1","T-2","T-3","T-4","T-5","T-6","T-7","T-8","T-9"
 // WICHTIG: erfasst ausschliesslich namentlich registrierte Personen. Mitgebrachte
 // Gäste sind anonym (rund die Hälfte aller Anwesenden) und hier nicht enthalten.
 const RETENTION = [
-  { label:"1×",    personen:142, teilnahmen:142, desc:"einmalig" },
-  { label:"2×",    personen:42,  teilnahmen:84,  desc:"wiedergekommen" },
-  { label:"3–4×",  personen:41,  teilnahmen:136, desc:"regelmässig" },
-  { label:"5+ ×",  personen:39,  teilnahmen:276, desc:"Stammgäste" },
+  { label:"1×", personen:139, teilnahmen:139, desc:"einmalig" },
+  { label:"2×", personen:47, teilnahmen:94, desc:"wiedergekommen" },
+  { label:"3–4×", personen:37, teilnahmen:124, desc:"regelmässig" },
+  { label:"5+ ×", personen:37, teilnahmen:261, desc:"Stammgäste" },
 ];
-const RET_PERSONEN_TOTAL = 264;
-const RET_TEILNAHMEN_TOTAL = 638;
+const RET_PERSONEN_TOTAL = 260;
+const RET_TEILNAHMEN_TOTAL = 618;
 
 // ─── THEME (JOY-Brand: Navy / Gold, helles UI) ────────────────────────────────
 const C = {
@@ -167,7 +168,7 @@ function JOYDashboard() {
           </div>
         </div>
         <div style={{ fontSize: 11, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
-          Vor Sep 2025 gab es keine Eingangskontrolle — nicht angemeldete Personen sind für diese Feiern nicht erfasst. Die tatsächliche Teilnahme lag dort nachweislich höher (siehe Umfrageschätzungen).
+          Vor Sep 2025 gab es keine Eingangskontrolle — nicht angemeldete Personen sind für diese Feiern nicht erfasst. Die tatsächliche Teilnahme lag dort nachweislich höher (siehe Umfrageschätzungen). Nov 2024 stammt aus dem abgelösten eyevip-System, das weder Walk-Ins noch mitgebrachte Gäste erfasst: dort sind 96 Anmeldungen belegt, die restlichen 64 Personen bis zur berichteten Gesamtzahl von 160 sind eine Hochrechnung aus der Umfrageschätzung, keine Messung.
         </div>
       </div>
 
@@ -269,8 +270,8 @@ function JOYDashboard() {
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           {[
-            ["Nur einmal da", "54%"],
-            ["Mehr als einmal", "46%"],
+            ["Nur einmal da", "53%"],
+            ["Mehr als einmal", "47%"],
             ["Ø Teilnahmen pro Person", "2,4"],
             ["Häufigste Einzelperson", "13 Feiern"],
           ].map(([l, v]) => (
@@ -282,16 +283,16 @@ function JOYDashboard() {
 
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6 }}>
-            Die 15% Stammgäste (5+ Teilnahmen) erzeugen 43% aller namentlichen Teilnahmen — die 54% Einmalbesuchenden zusammen nur 22%. JOY trägt sich also über einen kleinen, sehr aktiven Kern, während die Mehrheit nach dem ersten Besuch nicht wiederkommt.
+            Die 14% Stammgäste (5+ Teilnahmen) erzeugen 42% aller namentlichen Teilnahmen — die 53% Einmalbesuchenden zusammen nur 22%. JOY trägt sich also über einen kleinen, sehr aktiven Kern, während die Mehrheit nach dem ersten Besuch nicht wiederkommt.
           </div>
         </div>
 
         <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.5 }}>
-          Grundlage: 264 unterscheidbare Personen mit 638 Teilnahmen, abgeglichen über normalisierte Vor- und Nachnamen. <strong>Erfasst ausschliesslich namentlich registrierte Personen</strong> — mitgebrachte Gäste sind anonym und machen rund die Hälfte aller Anwesenden aus; über deren Wiederkehrverhalten sagen diese Zahlen nichts. Der Einmal-Anteil sinkt zudem strukturell mit jeder weiteren Feier, da Personen aus späteren Durchführungen noch weniger Gelegenheit hatten wiederzukommen.
+          Grundlage: 260 unterscheidbare Personen mit 618 Teilnahmen, abgeglichen über normalisierte Vor- und Nachnamen. <strong>Erfasst ausschliesslich namentlich registrierte Personen</strong> — mitgebrachte Gäste sind anonym und machen rund die Hälfte aller Anwesenden aus; über deren Wiederkehrverhalten sagen diese Zahlen nichts. Der Einmal-Anteil sinkt zudem strukturell mit jeder weiteren Feier, da Personen aus späteren Durchführungen noch weniger Gelegenheit hatten wiederzukommen.
         </div>
       </div>
     </div>
   );
 }
 window.JOYDashboard = JOYDashboard;
-
+})();

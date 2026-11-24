@@ -7,7 +7,9 @@ const { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveCont
 // parallel weiter. Der letzte Submission-Timestamp einer Datei ist deshalb NICHT
 // zuverlässig das Durchführungsdatum — alle Daten unten wurden gegen die
 // Referenzliste geprüft und, wo nötig, korrigiert (z.B. Mai 2026 = Fr, 01.05.2026;
-// Jun 2026 = Fr, 05.06.2026; Sep 2026 = Fr, 04.09.2026).
+// Jun 2026 = Fr, 05.06.2026; Sep 2026 = Fr, 04.09.2026; Nov 2026 = Fr, 06.11.2026
+// — die Jubiläums-Datei trägt im Namen das Exportdatum 20.11.2026, die Feier fand
+// laut Check-in-Protokoll (alle 115 Check-ins 18:10–18:58) am 06.11.2026 statt).
 //
 // Metrik-Logik:
 //   reg      = registriert UND erschienen (Check-in bestätigt)
@@ -34,29 +36,30 @@ const DATA = [
   { name:"Mai 2026", reg:71, walkin:15, noshow:4, total:86, guestPct:59, newPct:15, survey:null, hasEC:true },
   { name:"Jun 2026", reg:59, walkin:7, noshow:2, total:66, guestPct:55, newPct:20, survey:null, hasEC:true },
   { name:"Sep 2026", reg:66, walkin:12, noshow:7, total:78, guestPct:62, newPct:11, survey:null, hasEC:true },
+  { name:"Nov 2026", reg:119, walkin:9, noshow:4, total:128, guestPct:69, newPct:22, survey:null, hasEC:true },
 ];
 
-// Anmeldevorlauf über alle 15 Feiern kumuliert (Nov 2024 via eyeVIP-Anmeldedatum,
+// Anmeldevorlauf über alle 16 Feiern kumuliert (Nov 2024 via eyeVIP-Anmeldedatum,
 // übrige via Rsvp.io Submission-Timestamp, dedupliziert nach Buchungsgruppe).
 // Index 0–14 = T-0…T-14 Tage vor Durchführung, Index 15 = T-14+.
-const LEAD_TIME = [78, 91, 70, 59, 85, 28, 10, 9, 17, 11, 13, 36, 19, 11, 20, 157];
+const LEAD_TIME = [87, 94, 76, 63, 89, 29, 10, 9, 17, 14, 14, 38, 19, 13, 27, 161];
 const LEAD_LABELS = ["T-0","T-1","T-2","T-3","T-4","T-5","T-6","T-7","T-8","T-9","T-10","T-11","T-12","T-13","T-14","T-14+"];
 
-// Teilnahmehäufigkeit: Abgleich namentlich registrierter Personen über alle 15
-// Feiern (Vor- und Nachname normalisiert). 264 unterscheidbare Personen mit
-// zusammen 638 namentlichen Teilnahmen.
+// Teilnahmehäufigkeit: Abgleich namentlich registrierter Personen über alle 16
+// Feiern (Vor- und Nachname normalisiert). 268 unterscheidbare Personen mit
+// zusammen 655 namentlichen Teilnahmen.
 //   personen  = Anzahl Personen in dieser Häufigkeitsklasse
 //   teilnahmen = von dieser Klasse erzeugte Teilnahmen (Headcount-Anteil)
 // WICHTIG: erfasst ausschliesslich namentlich registrierte Personen. Mitgebrachte
 // Gäste sind anonym (rund die Hälfte aller Anwesenden) und hier nicht enthalten.
 const RETENTION = [
-  { label:"1×", personen:139, teilnahmen:139, desc:"einmalig" },
-  { label:"2×", personen:47, teilnahmen:94, desc:"wiedergekommen" },
-  { label:"3–4×", personen:37, teilnahmen:124, desc:"regelmässig" },
-  { label:"5+ ×", personen:37, teilnahmen:261, desc:"Stammgäste" },
+  { label:"1×", personen:142, teilnahmen:142, desc:"einmalig" },
+  { label:"2×", personen:50, teilnahmen:100, desc:"wiedergekommen" },
+  { label:"3–4×", personen:36, teilnahmen:122, desc:"regelmässig" },
+  { label:"5+ ×", personen:40, teilnahmen:291, desc:"Stammgäste" },
 ];
-const RET_PERSONEN_TOTAL = 260;
-const RET_TEILNAHMEN_TOTAL = 618;
+const RET_PERSONEN_TOTAL = 268;
+const RET_TEILNAHMEN_TOTAL = 655;
 
 // ─── THEME (JOY-Brand: Navy / Gold, helles UI) ────────────────────────────────
 const C = {
@@ -127,7 +130,7 @@ function JOYDashboard() {
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: C.gold, marginBottom: 4, fontWeight: 600 }}>JOY · Kathwil</div>
         <div style={{ fontSize: 22, fontWeight: 600 }}>Teilnehmer pro Feier</div>
-        <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{DATA.length} Durchführungen · Nov 2024 – Sep 2026</div>
+        <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{DATA.length} Durchführungen · Nov 2024 – Nov 2026</div>
       </div>
 
       {/* Metrics */}
@@ -189,6 +192,9 @@ function JOYDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
+          Der Wert hängt an wenigen Buchungsgruppen und reagiert stark auf einzelne Grossanmeldungen: Nov 2026 (69 %, Höchstwert) beruht auf 40 anwesenden Buchungen, von denen zwei allein 41 Personen mitbrachten.
+        </div>
       </div>
 
       {/* CHART 3 — Neue Personen */}
@@ -244,7 +250,7 @@ function JOYDashboard() {
 
       {/* ABSCHNITT — Teilnahmehäufigkeit */}
       <div style={{ marginTop: 34, paddingTop: 26, borderTop: `1px solid ${C.border}` }}>
-        <SectionLabel note="(namentlich registrierte Personen über alle 15 Feiern)">Einmal- vs. Mehrfachteilnahme</SectionLabel>
+        <SectionLabel note="(namentlich registrierte Personen über alle 16 Feiern)">Einmal- vs. Mehrfachteilnahme</SectionLabel>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 18 }}>
           {RETENTION.map(r => {
@@ -273,7 +279,7 @@ function JOYDashboard() {
             ["Nur einmal da", "53%"],
             ["Mehr als einmal", "47%"],
             ["Ø Teilnahmen pro Person", "2,4"],
-            ["Häufigste Einzelperson", "13 Feiern"],
+            ["Häufigste Einzelperson", "14 Feiern"],
           ].map(([l, v]) => (
             <div key={l} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", fontSize: 12 }}>
               <span style={{ color: C.muted }}>{l}: </span><span style={{ fontWeight: 600 }}>{v}</span>
@@ -283,12 +289,12 @@ function JOYDashboard() {
 
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6 }}>
-            Die 14% Stammgäste (5+ Teilnahmen) erzeugen 42% aller namentlichen Teilnahmen — die 53% Einmalbesuchenden zusammen nur 22%. JOY trägt sich also über einen kleinen, sehr aktiven Kern, während die Mehrheit nach dem ersten Besuch nicht wiederkommt.
+            Die 15% Stammgäste (5+ Teilnahmen) erzeugen 44% aller namentlichen Teilnahmen — die 53% Einmalbesuchenden zusammen nur 22%. JOY trägt sich also über einen kleinen, sehr aktiven Kern, während die Mehrheit nach dem ersten Besuch nicht wiederkommt.
           </div>
         </div>
 
         <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.5 }}>
-          Grundlage: 260 unterscheidbare Personen mit 618 Teilnahmen, abgeglichen über normalisierte Vor- und Nachnamen. <strong>Erfasst ausschliesslich namentlich registrierte Personen</strong> — mitgebrachte Gäste sind anonym und machen rund die Hälfte aller Anwesenden aus; über deren Wiederkehrverhalten sagen diese Zahlen nichts. Der Einmal-Anteil sinkt zudem strukturell mit jeder weiteren Feier, da Personen aus späteren Durchführungen noch weniger Gelegenheit hatten wiederzukommen.
+          Grundlage: 268 unterscheidbare Personen mit 655 Teilnahmen, abgeglichen über normalisierte Vor- und Nachnamen. <strong>Erfasst ausschliesslich namentlich registrierte Personen</strong> — mitgebrachte Gäste sind anonym und machen rund die Hälfte aller Anwesenden aus; über deren Wiederkehrverhalten sagen diese Zahlen nichts. Der Einmal-Anteil sinkt zudem strukturell mit jeder weiteren Feier, da Personen aus späteren Durchführungen noch weniger Gelegenheit hatten wiederzukommen.
         </div>
       </div>
     </div>

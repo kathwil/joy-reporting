@@ -43,6 +43,8 @@ const SEED = [
   {id:"e13", nr:13, date:"2026-05-01", attendees:86, responses:RAW.e13.length, kind:"csv", raw:RAW.e13, src:"01.05.26 · CSV"},
   {id:"e14", nr:14, date:"2026-06-05", attendees:66, responses:RAW.e14.length, kind:"csv", raw:RAW.e14, src:"05.06.26 · CSV"},
   {id:"e15", nr:15, date:"2026-09-04", attendees:78, responses:RAW.e15.length, kind:"csv", raw:RAW.e15, src:"04.09.26 · CSV"},
+  {id:"e16", nr:16, date:"2026-11-06", attendees:128, responses:0, kind:"none",
+   note:"Keine Rückmeldungen eingegangen.", src:"06.11.26"},
 ];
 
 /* ---------------- analysis engine ---------------- */
@@ -701,7 +703,7 @@ function Sidebar({editions, sel, setSel, view, setView, detail, setDetail, onlyD
         </div>
       )}
 
-      <p className="foot">Quelle: Rohdaten-CSV aller Durchführungen 11.2024–06.2026 (ausser 02.05.25, keine Rückmeldungen).</p>
+      <p className="foot">Quelle: Rohdaten-CSV aller Durchführungen 11.2024–11.2026 (ausser 02.05.25 und 06.11.26, keine Rückmeldungen).</p>
     </aside>
   );
 }
